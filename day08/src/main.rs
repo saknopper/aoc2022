@@ -23,33 +23,24 @@ fn main() {
             }
 
             let cur_tree_height = tree_map[[i, j]];
+            let (up, down, left, right) = get_search_directions(i, j, height, width, &tree_map);
 
-            let cur_column = tree_map.column(j);
-            let up = cur_column.iter().take(i).collect::<Vec<_>>();
-            if up.iter().find(|h| ***h >= cur_tree_height) == None {
+            if up.iter().find(|h| **h >= cur_tree_height) == None {
                 visible_trees += 1;
                 continue;
             }
 
-            let down = cur_column
-                .iter()
-                .rev()
-                .take(height - i - 1)
-                .collect::<Vec<_>>();
-            if down.iter().find(|h| ***h >= cur_tree_height) == None {
+            if down.iter().find(|h| **h >= cur_tree_height) == None {
                 visible_trees += 1;
                 continue;
             }
 
-            let cur_row = tree_map.row(i);
-            let left = cur_row.iter().take(j).collect::<Vec<_>>();
-            if left.iter().find(|h| ***h >= cur_tree_height) == None {
+            if left.iter().find(|h| **h >= cur_tree_height) == None {
                 visible_trees += 1;
                 continue;
             }
 
-            let right = cur_row.iter().rev().take(width - j - 1).collect::<Vec<_>>();
-            if right.iter().find(|h| ***h >= cur_tree_height) == None {
+            if right.iter().find(|h| **h >= cur_tree_height) == None {
                 visible_trees += 1;
                 continue;
             }
@@ -62,70 +53,52 @@ fn main() {
 
     for i in 0..height {
         for j in 0..width {
-            let mut up_score = 0;
-            let mut down_score = 0;
-            let mut left_score = 0;
-            let mut right_score = 0;
+            let up_score;
+            let down_score;
+            let left_score;
+            let right_score;
 
             let cur_tree_height = tree_map[[i, j]];
+            let (up, down, left, right) = get_search_directions(i, j, height, width, &tree_map);
 
-            let cur_column = tree_map.column(j);
-            let cur_row = tree_map.row(i);
-
-            if i != 0 {
-                let up = cur_column.iter().take(i).collect::<Vec<_>>();
-                let score = up
-                    .iter()
-                    .rev()
-                    .enumerate()
-                    .find(|(_idx, h)| ***h >= cur_tree_height);
-                match score {
-                    None => up_score = i,
-                    Some(s) => up_score = s.0 + 1,
-                }
+            match up
+                .iter()
+                .rev()
+                .enumerate()
+                .find(|(_idx, h)| **h >= cur_tree_height)
+            {
+                None => up_score = if i == 0 { 0 } else { i },
+                Some(s) => up_score = s.0 + 1,
             }
 
-            if i != height - 1 {
-                let down = cur_column
-                    .iter()
-                    .rev()
-                    .take(height - i - 1)
-                    .collect::<Vec<_>>();
-                let score = down
-                    .iter()
-                    .rev()
-                    .enumerate()
-                    .find(|(_idx, h)| ***h >= cur_tree_height);
-                match score {
-                    None => down_score = height - i - 1,
-                    Some(s) => down_score = s.0 + 1,
-                }
+            match down
+                .iter()
+                .rev()
+                .enumerate()
+                .find(|(_idx, h)| **h >= cur_tree_height)
+            {
+                None => down_score = if i == height - 1 { 0 } else { height - i - 1 },
+                Some(s) => down_score = s.0 + 1,
             }
 
-            if j != 0 {
-                let left = cur_row.iter().take(j).collect::<Vec<_>>();
-                let score = left
-                    .iter()
-                    .rev()
-                    .enumerate()
-                    .find(|(_idx, h)| ***h >= cur_tree_height);
-                match score {
-                    None => left_score = j,
-                    Some(s) => left_score = s.0 + 1,
-                }
+            match left
+                .iter()
+                .rev()
+                .enumerate()
+                .find(|(_idx, h)| **h >= cur_tree_height)
+            {
+                None => left_score = if j == 0 { 0 } else { j },
+                Some(s) => left_score = s.0 + 1,
             }
 
-            if j != width - 1 {
-                let right = cur_row.iter().rev().take(width - j - 1).collect::<Vec<_>>();
-                let score = right
-                    .iter()
-                    .rev()
-                    .enumerate()
-                    .find(|(_idx, h)| ***h >= cur_tree_height);
-                match score {
-                    None => right_score = height - j - 1,
-                    Some(s) => right_score = s.0 + 1,
-                }
+            match right
+                .iter()
+                .rev()
+                .enumerate()
+                .find(|(_idx, h)| **h >= cur_tree_height)
+            {
+                None => right_score = if j == width - 1 { 0 } else { height - j - 1 },
+                Some(s) => right_score = s.0 + 1,
             }
 
             highest_scenic_score =
@@ -134,4 +107,32 @@ fn main() {
     }
 
     print!("Part 2 - highest scenic score: {}\n", highest_scenic_score);
+}
+
+fn get_search_directions(
+    i: usize,
+    j: usize,
+    height: usize,
+    width: usize,
+    tree_map: &Array2<u8>,
+) -> (Vec<u8>, Vec<u8>, Vec<u8>, Vec<u8>) {
+    let cur_column = tree_map.column(j);
+    let up = cur_column.iter().take(i).copied().collect::<Vec<_>>();
+    let down = cur_column
+        .iter()
+        .rev()
+        .take(height - i - 1)
+        .copied()
+        .collect::<Vec<_>>();
+
+    let cur_row = tree_map.row(i);
+    let left = cur_row.iter().take(j).copied().collect::<Vec<_>>();
+    let right = cur_row
+        .iter()
+        .rev()
+        .copied()
+        .take(width - j - 1)
+        .collect::<Vec<_>>();
+
+    (up, down, left, right)
 }
