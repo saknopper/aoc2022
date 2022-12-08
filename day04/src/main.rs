@@ -1,7 +1,3 @@
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
-
 #[derive(Debug)]
 struct Elf {
     start: u32,
@@ -17,22 +13,10 @@ struct ElvesPair {
 fn main() {
     println!("Day 4");
 
-    let path = Path::new("input/part1.txt");
-    let display = path.display();
-
-    let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display, why),
-        Ok(file) => file,
-    };
-
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display, why),
-        Ok(_) => print!("read file {}\n", display),
-    }
+    let input = include_str!("../input/part1.txt");
 
     let mut elves_pairs: Vec<ElvesPair> = Vec::new();
-    for line in s.lines() {
+    for line in input.lines() {
         let splitted_areas: Vec<&str> = line.split(",").collect();
         assert_eq!(splitted_areas.len(), 2);
 

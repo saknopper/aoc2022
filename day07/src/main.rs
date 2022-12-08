@@ -39,12 +39,10 @@ fn parse_input(input: &str) -> HashMap<String, usize> {
             let cmd = line.split_at(2).1;
             let (action, dst) = cmd.split_once(' ').unwrap_or_default();
             if action == "cd" {
-                if dst == "/" {
-                    current_path.clear();
-                } else if dst == ".." {
-                    current_path.pop().unwrap();
-                } else {
-                    current_path.push(dst);
+                match dst {
+                    "/" => current_path.clear(),
+                    ".." => drop(current_path.pop()),
+                    _val => current_path.push(_val),
                 }
             }
         } else {

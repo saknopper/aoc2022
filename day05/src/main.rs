@@ -1,22 +1,15 @@
 use scanf::sscanf;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
 
 fn main() {
     println!("Day 5");
 
-    let path = Path::new("input/part1.txt");
-    let mut file = File::open(&path).expect("Couldn't open file");
+    let input = include_str!("../input/part1.txt");
 
-    let mut s = String::new();
-    file.read_to_string(&mut s).expect("Couldn't load file");
-
-    print!("Part 1: {}\n", move_and_get_top_containers(&s, false));
-    print!("Part 2: {}\n", move_and_get_top_containers(&s, true));
+    print!("Part 1: {}\n", move_and_get_top_containers(input, false));
+    print!("Part 2: {}\n", move_and_get_top_containers(input, true));
 }
 
-fn move_and_get_top_containers(input: &String, multiple_at_once: bool) -> String {
+fn move_and_get_top_containers(input: &str, multiple_at_once: bool) -> String {
     let splitted = input.split("\n\n").collect::<Vec<_>>();
     let container_input = splitted[0];
     let instructions_input = splitted[1];

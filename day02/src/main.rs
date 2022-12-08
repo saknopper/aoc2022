@@ -1,24 +1,9 @@
 use std::collections::HashMap;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
 
 fn main() {
     println!("Day 2");
 
-    let path = Path::new("input/part1.txt");
-    let display = path.display();
-
-    let mut file = match File::open(&path) {
-        Err(why) => panic!("couldn't open {}: {}", display, why),
-        Ok(file) => file,
-    };
-
-    let mut s = String::new();
-    match file.read_to_string(&mut s) {
-        Err(why) => panic!("couldn't read {}: {}", display, why),
-        Ok(_) => print!("read file {}\n", display),
-    }
+    let input = include_str!("../input/part1.txt");
 
     // 1 for Rock, 2 for Paper, and 3 for Scissors
     // A for Rock, B for Paper, and C for Scissors
@@ -36,9 +21,9 @@ fn main() {
         ("CX", 6), ("CY", 0), ("CZ", 3)
     ]);
 
-    let mut splitted_lines_mutable : Vec<Vec<&str>> = Vec::new();
-    for line in s.lines() {
-        let splitted : Vec<&str> = line.split(" ").collect();
+    let mut splitted_lines_mutable: Vec<Vec<&str>> = Vec::new();
+    for line in input.lines() {
+        let splitted: Vec<&str> = line.split(" ").collect();
         assert_eq!(splitted.len(), 2);
 
         splitted_lines_mutable.push(splitted);
@@ -46,7 +31,7 @@ fn main() {
 
     let splitted_lines = splitted_lines_mutable.as_slice();
 
-    let mut total_score : u64 = 0;
+    let mut total_score: u64 = 0;
     for line in splitted_lines {
         let round = format!("{}{}", line[0], line[1]);
 

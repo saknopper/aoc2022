@@ -1,23 +1,16 @@
 use std::collections::HashSet;
-use std::fs::File;
-use std::io::prelude::*;
-use std::path::Path;
 use substring::Substring;
 
 fn main() {
     println!("Day 6");
 
-    let path = Path::new("input/part1.txt");
-    let mut file = File::open(&path).expect("Couldn't open file");
+    let input = include_str!("../input/part1.txt");
 
-    let mut s = String::new();
-    file.read_to_string(&mut s).expect("Couldn't load file");
-
-    print!("Part 1 - {}\n", find_marker_with_size(4, &s));
-    print!("Part 2 - {}\n", find_marker_with_size(14, &s));
+    print!("Part 1 - {}\n", find_marker_with_size(4, input));
+    print!("Part 2 - {}\n", find_marker_with_size(14, input));
 }
 
-fn find_marker_with_size(marker_size: u32, input : &String) -> u32 {
+fn find_marker_with_size(marker_size: u32, input : &str) -> u32 {
     for i in 0..(input.len() - marker_size as usize) {
         let mut char_set = HashSet::new();
 
