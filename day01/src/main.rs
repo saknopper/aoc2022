@@ -4,16 +4,8 @@ fn main() {
     let input = include_str!("../input/part1.txt");
 
     let mut calories: Vec<u64> = Vec::new();
-    calories.push(0);
-    let mut index: usize = 0;
-    for line in input.lines() {
-        if line.is_empty() {
-            index += 1;
-            calories.push(0);
-            continue;
-        }
-
-        calories[index] += line.parse::<u64>().unwrap();
+    for group in input.split("\n\n") {
+        calories.push(group.lines().map(|l| l.parse::<u64>().unwrap()).sum());
     }
 
     calories.sort();
