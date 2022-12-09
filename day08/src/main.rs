@@ -14,14 +14,9 @@ fn main() {
         }
     }
 
-    let mut visible_trees: u32 = 0;
-    for i in 0..height {
-        for j in 0..width {
-            if i == 0 || j == 0 || i == height - 1 || j == width - 1 {
-                visible_trees += 1;
-                continue;
-            }
-
+    let mut visible_trees = (2 * height) + ((width - 2) * 2);
+    for i in 1..height - 1 {
+        for j in 1..width - 1 {
             let cur_tree_height = tree_map[[i, j]];
             let (up, down, left, right) = get_search_directions(i, j, height, width, &tree_map);
 
@@ -51,8 +46,8 @@ fn main() {
 
     let mut highest_scenic_score = 0;
 
-    for i in 0..height {
-        for j in 0..width {
+    for i in 1..height - 1 {
+        for j in 1..width - 1 {
             let up_score;
             let down_score;
             let left_score;
@@ -67,7 +62,7 @@ fn main() {
                 .enumerate()
                 .find(|(_idx, h)| **h >= cur_tree_height)
             {
-                None => up_score = if i == 0 { 0 } else { i },
+                None => up_score = i,
                 Some(s) => up_score = s.0 + 1,
             }
 
@@ -77,7 +72,7 @@ fn main() {
                 .enumerate()
                 .find(|(_idx, h)| **h >= cur_tree_height)
             {
-                None => down_score = if i == height - 1 { 0 } else { height - i - 1 },
+                None => down_score = height - i - 1,
                 Some(s) => down_score = s.0 + 1,
             }
 
@@ -87,7 +82,7 @@ fn main() {
                 .enumerate()
                 .find(|(_idx, h)| **h >= cur_tree_height)
             {
-                None => left_score = if j == 0 { 0 } else { j },
+                None => left_score = j,
                 Some(s) => left_score = s.0 + 1,
             }
 
@@ -97,7 +92,7 @@ fn main() {
                 .enumerate()
                 .find(|(_idx, h)| **h >= cur_tree_height)
             {
-                None => right_score = if j == width - 1 { 0 } else { height - j - 1 },
+                None => right_score = height - j - 1,
                 Some(s) => right_score = s.0 + 1,
             }
 
