@@ -39,5 +39,21 @@ fn main() {
         .map(|c| cycle_register_values[(*c) - 1] * (*c as isize))
         .sum();
 
-    print!("Part 1 - {}\n", sum);
+    println!("Part 1 - {}", sum);
+
+    let crt = cycle_register_values
+        .iter()
+        .enumerate()
+        .map(|v| {
+            let row_cycle = v.0 as isize % 40;
+            if (v.1 - 1..=v.1 + 1).contains(&row_cycle) {
+                return '#';
+            }
+            return '.';
+        })
+        .collect::<Vec<char>>();
+
+    println!("Part 2");
+    crt.chunks(40)
+        .for_each(|crt_line| println!("{:?}", crt_line.iter().collect::<String>()));
 }
