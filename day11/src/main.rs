@@ -21,12 +21,26 @@ fn main() {
     println!("Day 11");
 
     let input = include_str!("../input/part1.txt");
-    let splitted_by_monkey = input.split("\n\n").collect::<Vec<_>>();
+    let split_by_monkey = input.split("\n\n").collect::<Vec<_>>();
 
+    let part1 = calc_monkey_business(&split_by_monkey, 20, false);
+    println!("part 1: {}", part1);
+
+    let part2 = calc_monkey_business(&split_by_monkey, 10000, true);
+    println!("part 2: {}", part2);
+}
+
+fn calc_monkey_business(split_by_monkey: &Vec<&str>, rounds: usize, use_lcm: bool) -> usize {
     let mut monkeys: Vec<RefCell<Monkey>> = Vec::new();
-    parse_input(&splitted_by_monkey, &mut monkeys);
+    parse_input(&split_by_monkey, &mut monkeys);
 
-    for _ in 0..20 {
+    let lcm: usize = monkeys
+        .iter()
+        .map(|m| m.borrow().test_divisor)
+        .reduce(|a, b| a * b)
+        .unwrap();
+
+    for _ in 0..rounds {
         let mut monkeys_iter = monkeys.iter();
         while let Some(monkey_cell) = monkeys_iter.next() {
             let mut monkey = monkey_cell.borrow_mut();
@@ -37,7 +51,10 @@ fn main() {
                     Operation::SQUARED => item * item,
                 };
 
-                let new_item_worry = new_item_worry / 3;
+                let new_item_worry = match use_lcm {
+                    true => new_item_worry % lcm,
+                    false => new_item_worry / 3,
+                };
 
                 let dst_monkey = match new_item_worry % monkey.test_divisor {
                     0 => monkey.test_success_monkey,
@@ -57,22 +74,19 @@ fn main() {
         }
     }
 
-    monkeys.iter().for_each(|m| println!("{:?}", m));
-
     monkeys.sort_by(|a, b| {
         a.borrow()
             .inspection_count
             .cmp(&b.borrow().inspection_count)
     });
 
-    let monkey_business: usize = monkeys
+    monkeys
         .iter()
         .rev()
         .take(2)
         .map(|m| m.borrow().inspection_count)
         .reduce(|a, b| a * b)
-        .unwrap();
-    println!("part 1: {monkey_business}");
+        .unwrap()
 }
 
 fn parse_input(splitted_by_monkey: &Vec<&str>, monkeys: &mut Vec<RefCell<Monkey>>) {
@@ -134,15 +148,13 @@ fn parse_input(splitted_by_monkey: &Vec<&str>, monkeys: &mut Vec<RefCell<Monkey>
 
         monkeys.push(RefCell::new(Monkey {
             items: starting_items,
-            operation: if operation_rh == "old" {
-                Operation::SQUARED
-            } else {
-                operation
+            operation: match operation_rh {
+                "old" => Operation::SQUARED,
+                _ => operation,
             },
-            operation_rh: if operation_rh == "old" {
-                0
-            } else {
-                operation_rh.parse::<usize>().unwrap()
+            operation_rh: match operation_rh {
+                "old" => 0,
+                _val => _val.parse::<usize>().unwrap(),
             },
             test_divisor: test,
             test_fail_monkey: test_fail as usize,
