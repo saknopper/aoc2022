@@ -10,8 +10,8 @@ enum Tile {
 
 #[derive(Debug)]
 struct Point {
-    x: usize,
-    y: usize,
+    x: isize,
+    y: isize,
 }
 
 fn main() {
@@ -39,37 +39,27 @@ fn main() {
     println!("part 2: {}", unit_counter + 1);
 }
 
-fn do_sand_simulation(cave: &mut BTreeMap<usize, BTreeMap<usize, Tile>>, floor: usize) -> bool {
+fn do_sand_simulation(cave: &mut BTreeMap<isize, BTreeMap<isize, Tile>>, floor: isize) -> bool {
     let mut current_pos = Point { x: 500, y: 0 };
+    let positions_to_check: Vec<(isize, isize)> = vec![(0, 1), (-1, 1), (1, 1)];
+    let positions_to_check = positions_to_check.as_slice();
 
-    loop {
-        // Check below
-        let below = get_tile_at_position(cave, Point { x: current_pos.x, y: current_pos.y + 1 }, floor);
-        if *below == Tile::VOID {
-            return false;
-        }
-        if *below == Tile::AIR {
-            current_pos = Point { x: current_pos.x, y: current_pos.y + 1 };
-            continue;
-        }
-        // Check left
-        let below_left = get_tile_at_position(cave, Point { x: current_pos.x - 1, y: current_pos.y + 1 }, floor);
-        if *below_left == Tile::VOID {
-            return false;
-        }
-        if *below_left == Tile::AIR {
-            current_pos = Point { x: current_pos.x - 1, y: current_pos.y + 1 };
-            continue;
-        }
-
-        // Check right
-        let below_right = get_tile_at_position(cave, Point { x: current_pos.x + 1, y: current_pos.y + 1 }, floor);
-        if *below_right == Tile::VOID {
-            return false;
-        }
-        if *below_right == Tile::AIR {
-            current_pos = Point { x: current_pos.x + 1, y: current_pos.y + 1 };
-            continue;
+    'outer: loop {
+        for checking in positions_to_check {
+            match *get_tile_at_position(
+                cave,
+                Point { x: current_pos.x + checking.0, y: current_pos.y + checking.1 },
+                floor,
+            ) {
+                Tile::VOID => {
+                    return false;
+                }
+                Tile::AIR => {
+                    current_pos = Point { x: current_pos.x + checking.0, y: current_pos.y + checking.1 };
+                    continue 'outer;
+                }
+                _ => {}
+            }
         }
 
         cave.get_mut(&current_pos.x).unwrap().insert(current_pos.y, Tile::SAND);
@@ -83,7 +73,7 @@ fn do_sand_simulation(cave: &mut BTreeMap<usize, BTreeMap<usize, Tile>>, floor: 
     true
 }
 
-fn get_tile_at_position(cave: &mut BTreeMap<usize, BTreeMap<usize, Tile>>, p: Point, floor: usize) -> &Tile {
+fn get_tile_at_position(cave: &mut BTreeMap<isize, BTreeMap<isize, Tile>>, p: Point, floor: isize) -> &Tile {
     if floor != 0 && cave.get(&p.x).is_none() {
         let mut new_column = BTreeMap::new();
         new_column.insert(floor, Tile::ROCK);
@@ -99,7 +89,7 @@ fn get_tile_at_position(cave: &mut BTreeMap<usize, BTreeMap<usize, Tile>>, p: Po
     }
 }
 
-fn parse_cave(input: &str) -> (BTreeMap<usize, BTreeMap<usize, Tile>>, usize) {
+fn parse_cave(input: &str) -> (BTreeMap<isize, BTreeMap<isize, Tile>>, isize) {
     let mut paths: Vec<Vec<Point>> = Vec::new();
 
     input.lines().for_each(|line| {
@@ -108,8 +98,8 @@ fn parse_cave(input: &str) -> (BTreeMap<usize, BTreeMap<usize, Tile>>, usize) {
             .map(|pstr| {
                 let coords = pstr.split(',').collect::<Vec<_>>();
                 Point {
-                    x: coords.get(0).unwrap().parse::<usize>().unwrap(),
-                    y: coords.get(1).unwrap().parse::<usize>().unwrap(),
+                    x: coords.get(0).unwrap().parse::<isize>().unwrap(),
+                    y: coords.get(1).unwrap().parse::<isize>().unwrap(),
                 }
             })
             .collect::<Vec<_>>();
@@ -119,7 +109,7 @@ fn parse_cave(input: &str) -> (BTreeMap<usize, BTreeMap<usize, Tile>>, usize) {
     let max_x = paths.iter().flat_map(|points| points.iter()).map(|p| p.x).max().unwrap();
     let max_y = paths.iter().flat_map(|points| points.iter()).map(|p| p.y).max().unwrap();
 
-    let mut cave: BTreeMap<usize, BTreeMap<usize, Tile>> = BTreeMap::new();
+    let mut cave: BTreeMap<isize, BTreeMap<isize, Tile>> = BTreeMap::new();
     for distance_right in min_x..=max_x {
         cave.insert(distance_right, BTreeMap::new());
     }
@@ -148,7 +138,7 @@ fn parse_cave(input: &str) -> (BTreeMap<usize, BTreeMap<usize, Tile>>, usize) {
     (cave, max_y)
 }
 
-fn range_helper(l: usize, r: usize) -> RangeInclusive<usize> {
+fn range_helper(l: isize, r: isize) -> RangeInclusive<isize> {
     if l < r {
         l..=r
     } else {
