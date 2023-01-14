@@ -1,3 +1,5 @@
+use std::collections::HashSet;
+
 use sscanf::sscanf;
 
 #[derive(Debug)]
@@ -11,11 +13,18 @@ struct Sensor {
 fn main() {
     println!("Day 15");
 
-    let input = include_str!("../example/part1.txt");
+    let input = include_str!("../input/part1.txt");
 
-    let mut beacons = parse_input(input);
+    let sensors = parse_input(input);
 
-    beacons.iter().for_each(|b| println!("{:?}", b));
+    let mut positions_without_beacon: HashSet<(isize, isize)> = HashSet::new();
+    sensors.iter().for_each(|s| sensor_get_positions_without_beacon(s, &mut positions_without_beacon, 2000000));
+    // remove all positions where an actual beacon is present
+    sensors.iter().for_each(|s| {
+        positions_without_beacon.remove(&(s.beacon_y, s.beacon_x));
+    });
+    let part1 = positions_without_beacon.len();
+    println!("{:?}", part1);
 }
 
 fn parse_input(input: &str) -> Vec<Sensor> {
@@ -28,4 +37,23 @@ fn parse_input(input: &str) -> Vec<Sensor> {
             Sensor { x: s_x, y: s_y, beacon_x: b_x, beacon_y: b_y, safe_distance: distance }
         })
         .collect()
+}
+
+fn sensor_get_positions_without_beacon(
+    sensor: &Sensor,
+    positions: &mut HashSet<(isize, isize)>,
+    row_of_interest: isize,
+) {
+    for row in (sensor.y - sensor.safe_distance)..=(sensor.y + sensor.safe_distance) {
+        if row != row_of_interest {
+            continue;
+        }
+
+        let column_width = ((sensor.y - row).abs() - sensor.safe_distance).abs();
+        //println!("row {}, column width {}", row, column_width);
+        for column in (sensor.x - column_width)..=(sensor.x + column_width) {
+            //println!("checking {},{}", row, column);
+            positions.insert((row, column));
+        }
+    }
 }
